@@ -6,7 +6,7 @@ memtest: memtest.o mymalloc.o
 	$(CC) $(CFLAGS) $(DEBUG) memtest.o mymalloc.o -o memtest  
 
 mymalloc.o: mymalloc.c mymalloc.h  
-	$(CC) $(CFLAGS) -c -Wall mymalloc.c  
+	$(CC) $(CFLAGS) $(DEBUG) -c -Wall mymalloc.c  
 
 memtest.o: memtest.c mymalloc.h  
 	$(CC) $(CFLAGS) $(DEBUG) -c -Wall memtest.c

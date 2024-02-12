@@ -6,15 +6,13 @@
 #include "mymalloc.h"
 
 // Define booleans
-// #define BOOL char
+// #define bool char
 // #define FALSE 0
 // #define TRUE 1
 #include <stdbool.h>
 
 #ifndef DEBUG
 #define DEBUG 0
-#else
-printf("DEBUG MODE ON.")
 #endif
 
 // Defining our memory array
@@ -23,6 +21,8 @@ static double memory[MEMLENGTH];
 
 // Defining the metadata
 #define metadata unsigned long long
+#define readFirstBit(x) ((metadata) x << ((sizeof(unsigned long long)*8)-1))
+
 
 // Metadata creation function
 metadata create_metadata(size_t byte_size, bool allocation) {
@@ -39,9 +39,25 @@ void init_memory(metadata* heapstart) {
 }
 
 void *mymalloc(size_t size, char *file, int line){
+	if (DEBUG) printf("DEBUG MODE ON.\n");
+
 	metadata *heapstart = (metadata *) memory;
 	
 	if((heapstart[0]|0x0000000000000000) == 0x0000000000000000) init_memory(heapstart);
+	
+	int memory_block = 0;
+	while(memory_block < MEMLENGTH) {
+		if(readFirstBit(heapstart[memory_block]) == 1) {
+			int* mem_block_counter = (int *) (memory + memory_block);
+			memory_block += *(mem_block_counter + 1);
+			if(DEBUG) printf("%d\n", memory_block);
+		else {
+			metadata replacement = create_metadata(size, true);
+			heapstart[memory_block] = replacement;
+			// Make sure to move the pointer to where the end of the allocated block is and then make the new metadata for the unallocated remaining.
+			}
+		}
+	}
 	return (void *) heapstart;
 }
 
