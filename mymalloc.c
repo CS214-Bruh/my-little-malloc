@@ -13,7 +13,8 @@
 
 #ifndef DEBUG
 #define DEBUG 0
-printf("DEBUG MODE ON (Print statements are active)\n");
+#else
+printf("DEBUG MODE ON.")
 #endif
 
 // Defining our memory array
@@ -39,10 +40,10 @@ void init_memory(metadata* heapstart) {
 
 void *mymalloc(size_t size, char *file, int line){
 	metadata *heapstart = (metadata *) memory;
-
+	
 	if((heapstart[0]|0x0000000000000000) == 0x0000000000000000) init_memory(heapstart);
-
-};
+	return (void *) heapstart;
+}
 
 void myfree(void *ptr, char *file, int line);
 
