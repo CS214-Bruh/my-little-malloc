@@ -11,8 +11,8 @@ mymalloc.o: mymalloc.c mymalloc.h
 memtest.o: memtest.c mymalloc.h  
 	$(CC) $(CFLAGS) $(DEBUG) -c -Wall memtest.c
 
-test: mytest
-	./mytest
+test: memtest
+	./memtest
 
 mytest: mytest.o mymalloc.o
 	$(CC) $(CFLAGS) $(DEBUG) mytest.o mymalloc.o -o mytest
