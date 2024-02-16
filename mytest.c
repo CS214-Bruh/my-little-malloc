@@ -44,6 +44,15 @@ int malloc_max_number() {
     return errors;
 }
 
+// Speed test for malloc() and free() as well as the combination of them.
+struct timeval malloc_start, malloc_stop, malloc_result;
+
+void speed_test(char choice) {
+    if(choice == 0) {
+        gettimeofday(&malloc_start, NULL);
+    }
+}
+
 int main(int argc, char **argv)
 {
 //    double* a = malloc(sizeof(double));
