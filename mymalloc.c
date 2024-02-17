@@ -204,6 +204,8 @@ void myfree(void *ptr, char *file, int line) {
 	- if free was called on an address not at the start of an address
 	- if free was called on something already freed
 	*/
+    //cast ptr
+    metadata new_ptr = (metadata) ptr;
 
 	//case 1: check if the address is in the memory array
     //case 2: check if the address isn't at start
@@ -218,7 +220,7 @@ void myfree(void *ptr, char *file, int line) {
     //traversing memory to find address
     while(current_block < MEMLENGTH) {
        
-        if(heapstart[current_block] == ptr) {
+        if(heapstart[current_block] + 1 == new_ptr) {
             //move to next block if not free
             in_array = true;
             break;
@@ -240,8 +242,8 @@ void myfree(void *ptr, char *file, int line) {
 	//case 4: everything is passed (read_first_bit returns a 1 or 0.)
 	//read_first_bit(*(metadata *)ptr);
 
-    metadata new_header = create_metadata(read_block_size(ptr), false);
-    ptr = new_header; //free up the space
+    metadata new_header = create_metadata(read_block_size(new_ptr), false);
+    new_ptr = new_header; //free up the space
 	coalesce(heapstart);
 
 }
