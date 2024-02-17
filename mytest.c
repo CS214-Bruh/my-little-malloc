@@ -47,6 +47,12 @@ int malloc_max_number() {
     for(int i = 0; i < BLOCKSIZE/2; i++) {
         arr[i] = malloc(sizeof(char));
     }
+
+    free(arr[1]);
+
+    arr[1] = malloc(sizeof(char));
+
+        /*
     // Give each one a unique number
     for(int i = 0; i < BLOCKSIZE/2; i++) {
         *arr[i] = i;
@@ -56,7 +62,7 @@ int malloc_max_number() {
     for(int i = 0; i < BLOCKSIZE/2; i++) {
         if(i != *arr[i]) errors++;
     }
-    return errors;
+    return errors; */
 }
 
 // Free 2 adjacent memory addresses to see if coalesce will work.
@@ -101,9 +107,10 @@ int main(int argc, char **argv)
 {
 //    double* a = malloc(sizeof(double));
 //    char* b = malloc(sizeof(char)*7);
-//    malloc_huge();
+    malloc_max_number();
 //    malloc_huge_minus_one();
     // printf("Number of Total Errors: %d\n", malloc_max_number());
     speed_test(0);
+
     return EXIT_SUCCESS;
 }
