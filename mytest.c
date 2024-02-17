@@ -13,9 +13,12 @@
 #define MEMSIZE 4096
 #define HEADERSIZE 8
 
+char* save = void;
+
 // Malloc Error 1 (Too large of a Block)
 void malloc_huge() {
     char* pointer = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE));
+    save = pointer;
 }
 
 // Malloc 1 less than size of array and try to malloc 1 more to see if it works.
@@ -48,8 +51,10 @@ int main(int argc, char **argv)
 {
 //    double* a = malloc(sizeof(double));
 //    char* b = malloc(sizeof(char)*7);
-//    malloc_huge();
+    malloc_huge();
+    free(save);
+    malloc_huge();
 //    malloc_huge_minus_one();
-    printf("Number of Total Errors: %d\n", malloc_max_number());
+    //printf("Number of Total Errors: %d\n", malloc_max_number());
     return EXIT_SUCCESS;
 }

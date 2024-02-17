@@ -131,36 +131,67 @@ void *mymalloc(size_t size, char *file, int line){
     return NULL;
 }
 
-void coalesce(void *ptr) {
-    //size of the current chunk (The size of the current chunk is a 8-byte object)
-    metadata chunk_size = read_block_size(*(metadata *)ptr);
+void coalesce(metadata *ptr) {
+    //flag to see if prev chunk was free, true if free
+    int prev_status = false;
 
-    //flag to see if prev chunk was free
-    int prev_status = 0;
+    // Create a metadata-type pointer that will read the metadata at where the memory starts.
+	metadata *heapstart = (metadata *) memory;
+
+    //block we're currently in
+    unsigned int current_block = 0;
+
+    //prev block info
+    int prev_size = 0; 
+
+    //header of previous free block
+    unsigned int prev_block = 0;
+
 
     //traversing the memory
-    bool memory_block = false;
-    while(memory_block < MEMLENGTH) {
-        // I typecasted your ptr to a metadata object for now. You should change your void pointer if you don't want this.
-        if(read_first_bit(*(metadata *)ptr) == true) {
-            //if the memory block is allocated, continue
-            prev_status = 1;
-            int* mem_block_counter = (int *) (memory + memory_block);
-            memory_block += *(mem_block_counter + 1);
-        } else {
-            //found an empty space
-            if (prev_status == false) {
-                metadata current_size = read_block_size(*(metadata *)ptr);
-                int* prev_header = (int *) (memory - memory_block);	//does memory block include the header?
-                //make the current header into just a regular piece of memory
-                //make the previous header point into a piece of memory that's the prev + the current size
+    while(current_block < MEMLENGTH) {
+       
+        if(read_first_bit(heapstart[current_block]) == true) {
+            //move to next block if not free
+            current_block += (read_block_size(heapstart[current_block]) / 8)+1;
+
+            //set status
+            prev_status = false;
+        } else { 
+            //free block
+            if (prev_status == true) {
+                //prev was free too
+                int new_size = read_block_size(heapstart[current_block]) + prev_size;
+
+                //current block size
+                int current_size = read_block_size(heapstart[current_block]);
+
+                //change size on prev block header
+                metadata new_header = create_metadata(new_size, 0);
+                heapstart[prev_block] = new_header;
+
+                //set the current header to all 0's
+                heapstart[current_block] = 0x0000000000000000;
+                
+                //move to the next block
+                current_block += (current_size / 8)+1;
+                
+
+            } else {
+                //prev wasn't free
+                //set status
+                prev_status = true;
+
+                //set prev size
+                prev_size = read_block_size(heapstart[current_block]); 
+
+                //set prev header
+                prev_block = current_block;
+
+                //move to next block
+                current_block += (read_block_size(heapstart[current_block]) / 8)+1;
             }
-            // TODO: Fix this code
-            //make a header for the end of it?
-            //metadata replacement = create_metadata(size, true);
-            // You have no heapstart ptr lmfaooo
-            // heapstart[memory_block] = replacement;
-            // Make sure to move the pointer to where the end of the allocated block is and then make the new metadata for the unallocated remaining.
+            
         }
     }
 }
@@ -173,17 +204,48 @@ void myfree(void *ptr, char *file, int line) {
 	- if free was called on an address not at the start of an address
 	- if free was called on something already freed
 	*/
-	//case 1: check if the address is in the memory array
 
-	//case 2: check if the address isn't a multiple of 8
+	//case 1: check if the address is in the memory array
+    //case 2: check if the address isn't at start
+
+    // Create a metadata-type pointer that will read the metadata at where the memory starts.
+    bool in_array = false;
+	metadata *heapstart = (metadata *) memory;
+
+    //block we are in
+    unsigned int current_block = 0;
+
+    //traversing memory to find address
+    while(current_block < MEMLENGTH) {
+       
+        if(heapstart[current_block] == ptr) {
+            //move to next block if not free
+            in_array = true;
+            break;
+        } 
+        current_block += (read_block_size(heapstart[current_block]) / 8)+1;
+    }
+
+    if (!in_array) {
+        fprintf(stderr, "Free called on pointer not allocated by malloc on %s: Line %d.\n", file, line);
+        return;
+    }
 
 	//case 3: check if the header says the space is already free
+    if (read_first_bit(*(metadata *)ptr) == 0) {
+        fprintf(stderr, "Free called on pointer already freed on %s: Line %d.\n", file, line);
+        return;
+    }
 
 	//case 4: everything is passed (read_first_bit returns a 1 or 0.)
-	read_first_bit(*(metadata *)ptr);
-	coalesce(ptr); //is this right
+	//read_first_bit(*(metadata *)ptr);
+
+    metadata new_header = create_metadata(read_block_size(ptr), false);
+    ptr = new_header; //free up the space
+	coalesce(heapstart);
 
 }
+
 
 
 
