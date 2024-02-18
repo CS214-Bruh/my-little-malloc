@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -DREALMALLOC -Wall -fsanitize=address -std=c99
+CFLAGS = -Wall -fsanitize=address -std=c99
 DEBUG = -DDEBUG
 
 memtest: memtest.o mymalloc.o  

@@ -131,7 +131,7 @@ void *mymalloc(size_t size, char *file, int line){
     return NULL;
 }
 
-void coalesce(metadata *ptr) {
+void coalesce() {
     //flag to see if prev chunk was free, true if free
     int prev_status = false;
 
@@ -142,7 +142,7 @@ void coalesce(metadata *ptr) {
     unsigned int current_block = 0;
 
     //prev block info
-    int prev_size = 0; 
+    unsigned long long prev_size = 0; 
 
     //header of previous free block
     unsigned int prev_block = 0;
@@ -161,20 +161,20 @@ void coalesce(metadata *ptr) {
             //free block
             if (prev_status == true) {
                 //prev was free too
-                int new_size = read_block_size(heapstart[current_block]) + prev_size;
+                unsigned long long new_size = read_block_size(heapstart[current_block]) + prev_size;
 
-                //current block size
-                int current_size = read_block_size(heapstart[current_block]);
+                //set new prev size
+                prev_size = new_size;
 
                 //change size on prev block header
-                metadata new_header = create_metadata(new_size, 0);
+                metadata new_header = create_metadata(new_size, false);
                 heapstart[prev_block] = new_header;
 
                 //set the current header to all 0's
                 heapstart[current_block] = 0x0000000000000000;
                 
                 //move to the next block
-                current_block += (current_size / 8)+1;
+                current_block += (read_block_size(heapstart[current_block]) / 8)+1;
                 
 
             } else {
@@ -197,15 +197,16 @@ void coalesce(metadata *ptr) {
 }
 
 void myfree(void *ptr, char *file, int line) {
-	/*
+    /*
 
 	things to check for:
 	- if free was called on a pointer not allocated my malloc
 	- if free was called on an address not at the start of an address
 	- if free was called on something already freed
 	*/
-    //cast ptr
-    metadata new_ptr = (metadata) ptr;
+    //cast ptr, points to the malloced block
+    metadata *new_ptr = (metadata *) (ptr);
+    //printf("the block address: %llu\n", ptr);
 
 	//case 1: check if the address is in the memory array
     //case 2: check if the address isn't at start
@@ -214,37 +215,57 @@ void myfree(void *ptr, char *file, int line) {
     bool in_array = false;
 	metadata *heapstart = (metadata *) memory;
 
+    //create a metadata to store the metadata of the block once we find it
+    unsigned int found_block = 0;
+
     //block we are in
     unsigned int current_block = 0;
+    /*
+    printf("the first address %llu\n", &heapstart[current_block]);
+    printf("the next address %llu\n", &heapstart[current_block + 1]);
+    printf("the metadata %llu\n", heapstart[current_block]);
+    printf("Memory Block Size: %llu\n", read_block_size(heapstart[current_block]));
+    */
 
     //traversing memory to find address
     while(current_block < MEMLENGTH) {
        
-        if(heapstart[current_block] + 1 == new_ptr) {
-            //move to next block if not free
+
+       //compare addresses w/ and see if we can find the block
+        if((&heapstart[current_block+1])== new_ptr) {
+            found_block = current_block;
             in_array = true;
             break;
         } 
         current_block += (read_block_size(heapstart[current_block]) / 8)+1;
-    }
+    } 
 
+    //error: when pointer not in memory allocated by malloc
     if (!in_array) {
         fprintf(stderr, "Free called on pointer not allocated by malloc on %s: Line %d.\n", file, line);
         return;
     }
+    
 
 	//case 3: check if the header says the space is already free
-    if (read_first_bit(*(metadata *)ptr) == 0) {
+    if (read_first_bit(heapstart[found_block]) == 0) {
         fprintf(stderr, "Free called on pointer already freed on %s: Line %d.\n", file, line);
         return;
-    }
+    } 
 
 	//case 4: everything is passed (read_first_bit returns a 1 or 0.)
-	//read_first_bit(*(metadata *)ptr);
+    printf("Freeing block...");
+    heapstart[found_block] = create_metadata(read_block_size(heapstart[found_block]), false);
 
-    metadata new_header = create_metadata(read_block_size(new_ptr), false);
-    new_ptr = new_header; //free up the space
-	coalesce(heapstart);
+    //informative messages
+    printf("Successfully freed block: %d, Free metadata: %llu, Freed block size: %llu \n", found_block, heapstart[found_block], read_block_size(heapstart[found_block]) );
+    
+    //printf("the new metadeta %llu\n ", create_metadata(4088, false));
+    //printf("the original arrauy header %llu, the size of the free area %llu, the first bit %llu", heapstart[0], read_block_size(heapstart[0]), read_first_bit(heapstart[0]));
+
+    //coalesce the free chunks
+	coalesce();
+    return;
 
 }
 
