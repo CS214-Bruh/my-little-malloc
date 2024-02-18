@@ -19,14 +19,17 @@ unsigned char *arr[BLOCKSIZE/2];
 void standard_malloc_free() {
     // Malloc it
     char* pointer = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE)-1);
+    printf("the pointer address %llu\n", &pointer);
     // Free it
+    free(pointer);
     free(pointer);
     // Malloc again
     char* pointer2 = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE)-1);
-    for(int i = 0; i < BLOCKSIZE; i++) {
+   /* for(int i = 0; i < BLOCKSIZE; i++) {
         *pointer2 = i%256;
-        printf("%c\n", *pointer2);
+        printf("%d", *pointer2);
     }
+    printf("/n"); */
 }
 
 // Malloc Error 1 (Too large of a Block)
@@ -48,11 +51,6 @@ int malloc_max_number() {
         arr[i] = malloc(sizeof(char));
     }
 
-    free(arr[1]);
-
-    arr[1] = malloc(sizeof(char));
-
-        /*
     // Give each one a unique number
     for(int i = 0; i < BLOCKSIZE/2; i++) {
         *arr[i] = i;
@@ -62,7 +60,7 @@ int malloc_max_number() {
     for(int i = 0; i < BLOCKSIZE/2; i++) {
         if(i != *arr[i]) errors++;
     }
-    return errors; */
+    return errors; 
 }
 
 // Free 2 adjacent memory addresses to see if coalesce will work.
@@ -103,14 +101,35 @@ void speed_test(char choice) {
     }
 }
 
+void my_coalesce_test() {
+    // Malloc it
+    char* pointer = malloc((sizeof(char) * (MEMSIZE-HEADERSIZE)-1)/4);
+    char* pointer2 = malloc((sizeof(char) * (MEMSIZE-HEADERSIZE)-1)/4);
+    char* pointer3 = malloc((sizeof(char) * (MEMSIZE-HEADERSIZE)-1)/4);
+    // Free it
+    free(pointer);
+    free(pointer2);
+    free(pointer3);
+    // Malloc again
+    char* pointer4 = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE)-1);
+   /* for(int i = 0; i < BLOCKSIZE; i++) {
+        *pointer2 = i%256;
+        printf("%d", *pointer2);
+    }
+    printf("/n"); */
+}
+
 int main(int argc, char **argv)
 {
 //    double* a = malloc(sizeof(double));
 //    char* b = malloc(sizeof(char)*7);
-    malloc_max_number();
+   // malloc_max_number();
 //    malloc_huge_minus_one();
     // printf("Number of Total Errors: %d\n", malloc_max_number());
-    speed_test(0);
+    //speed_test(0);
+    //standard_malloc_free();
+     my_coalesce_test();
+     //free_coalesce_adj_test();
 
     return EXIT_SUCCESS;
 }
