@@ -70,10 +70,10 @@ int free_coalesce_adj_test() {
     for(int i = 0; i < BLOCKSIZE/2; i+=2) {
         free(arr[i]);
     }
-    for(int i = (BLOCKSIZE/4)-1; i < BLOCKSIZE/2; i+=2) {
+    for(int i = 1; i < BLOCKSIZE/2; i+=2) {
         free(arr[i]);
     }
-    char* new_ptr = malloc(sizeof(char) * ((MEMSIZE-HEADERSIZE)/2));
+    char* new_ptr = malloc(sizeof(char) * ((MEMSIZE-HEADERSIZE-1)));
     return 1;
     /*double *array_pointers[BLOCKSIZE/4];
     for(int i = 0; i < BLOCKSIZE/4; i++) {
