@@ -112,11 +112,11 @@ void my_coalesce_test() {
     free(pointer3);
     // Malloc again
     char* pointer4 = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE)-1);
-   /* for(int i = 0; i < BLOCKSIZE; i++) {
+    for(int i = 0; i < BLOCKSIZE; i++) {
         *pointer2 = i%256;
         printf("%d", *pointer2);
     }
-    printf("/n"); */
+    printf("/n");
 }
 
 int main(int argc, char **argv)
