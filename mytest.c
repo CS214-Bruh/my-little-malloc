@@ -67,11 +67,15 @@ int malloc_max_number() {
 int free_coalesce_adj_test() {
     malloc_max_number();
     // Free up only half of the
-    for(int i = 0; i < BLOCKSIZE/2; i+=3) {
+    for(int i = 0; i < BLOCKSIZE/2; i+=2) {
         free(arr[i]);
-        free(arr[i+1]);
     }
-    double *array_pointers[BLOCKSIZE/4];
+    for(int i = (BLOCKSIZE/4)-1; i < BLOCKSIZE/2; i+=2) {
+        free(arr[i]);
+    }
+    char* new_ptr = malloc(sizeof(char) * ((MEMSIZE-HEADERSIZE)/2));
+    return 1;
+    /*double *array_pointers[BLOCKSIZE/4];
     for(int i = 0; i < BLOCKSIZE/4; i++) {
         array_pointers[i] = malloc(sizeof(double) *2);
         *array_pointers[i] = i + 0.25;
@@ -82,7 +86,7 @@ int free_coalesce_adj_test() {
         if(*array_pointers[i] != i + 0.25) errors++;
         if(*(array_pointers[i]+1) != i + 0.5) errors++;
     }
-    return errors;
+    return errors;*/
 }
 
 // Speed test for malloc() and free() as well as the combination of them.
@@ -101,22 +105,27 @@ void speed_test(char choice) {
     }
 }
 
-void my_coalesce_test() {
+int my_coalesce_test() {
     // Malloc it
     char* pointer = malloc((sizeof(char) * (MEMSIZE-HEADERSIZE)-1)/4);
     char* pointer2 = malloc((sizeof(char) * (MEMSIZE-HEADERSIZE)-1)/4);
     char* pointer3 = malloc((sizeof(char) * (MEMSIZE-HEADERSIZE)-1)/4);
     // Free it
     free(pointer);
-    free(pointer2);
     free(pointer3);
+    free(pointer2);
     // Malloc again
-    char* pointer4 = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE)-1);
+   unsigned char* pointer4 = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE)-1);
     for(int i = 0; i < BLOCKSIZE; i++) {
-        *pointer2 = i%256;
-        printf("%d", *pointer2);
+        *(pointer4+i) = i%256;
     }
-    printf("/n");
+    // Check for errors
+    int errors = 0;
+    for(int i = 0; i < BLOCKSIZE; i++) {
+        if(*(pointer4+i) != i%256) errors++;
+        
+    }
+    return errors;
 }
 
 int main(int argc, char **argv)
@@ -128,8 +137,8 @@ int main(int argc, char **argv)
     // printf("Number of Total Errors: %d\n", malloc_max_number());
     //speed_test(0);
     //standard_malloc_free();
-     my_coalesce_test();
-     //free_coalesce_adj_test();
+   // printf("Number of Total errors for coalesce: %d\n", my_coalesce_test());
+     free_coalesce_adj_test();
 
     return EXIT_SUCCESS;
 }
