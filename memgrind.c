@@ -14,6 +14,8 @@
 #define HEADERSIZE 8
 
 #define NUMMALTESTS 4
+#define MAX_INT 2147483647
+
 unsigned char *arr[BLOCKSIZE/2];
 
 // Standard malloc and free test on 1 huge block.
@@ -127,11 +129,11 @@ void speed_test(int number_of_times) {
     // Keep track of some stats for malloc
     double malloc_avg = 0;
     double malloc_top = 0;
-    double malloc_low = 0;
+    double malloc_low = MAX_INT;
     // Some for free
     double free_avg = 0;
     double free_top = 0;
-    double free_low = 0;
+    double free_low = MAX_INT;
 
     while(i < number_of_times) {
         gettimeofday(&malloc_start, NULL);
