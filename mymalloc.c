@@ -278,11 +278,11 @@ void myfree(void *ptr, char *file, int line) {
     } 
 
 	//case 4: everything is passed (read_first_bit returns a 1 or 0.)
-    printf("Freeing block...");
+    if(DEBUG) printf("Freeing block...");
     heapstart[found_block] = create_metadata(read_block_size(heapstart[found_block]), false);
 
     //informative messages
-    printf("Successfully freed block: %d, Free metadata: %llu, Freed block size: %llu \n", found_block, heapstart[found_block], read_block_size(heapstart[found_block]) );
+    if(DEBUG) printf("Successfully freed block: %d, Free metadata: %llu, Freed block size: %llu \n", found_block, heapstart[found_block], read_block_size(heapstart[found_block]) );
     
     //printf("the new metadeta %llu\n ", create_metadata(4088, false));
     //printf("the original arrauy header %llu, the size of the free area %llu, the first bit %llu", heapstart[0], read_block_size(heapstart[0]), read_first_bit(heapstart[0]));
