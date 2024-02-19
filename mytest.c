@@ -69,10 +69,12 @@ int free_coalesce_adj_test() {
     // Free up only half of the
     for(int i = 0; i < BLOCKSIZE/2; i+=2) {
         free(arr[i]);
-    }
+    } 
+
+
     for(int i = 1; i < BLOCKSIZE/2; i+=2) {
         free(arr[i]);
-    }
+    }  
     char* new_ptr = malloc(sizeof(char) * ((MEMSIZE-HEADERSIZE-1)));
     return 1;
     /*double *array_pointers[BLOCKSIZE/4];

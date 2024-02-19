@@ -94,8 +94,8 @@ void *mymalloc(size_t size, char *file, int line){
 			// if(DEBUG) printf("Block Not Empty, Moving to block: %d\n", memory_block);
 		} else {
 			unsigned int mem_block_size_b = heapstart[memory_block];
-            if(DEBUG) {printf("Found free block of size: %d, (Allocated: %i)\n", mem_block_size_b,
-                        read_first_bit(heapstart[memory_block]));}
+            if(DEBUG) {printf("Found free block of size: %d, (Allocated: %i), at block: %llu\n", mem_block_size_b,
+                        read_first_bit(heapstart[memory_block]), memory_block);}
 			if(mem_block_size_b >= size) {
 				// Create the replacement metadata
 				metadata replacement = create_metadata(size, true);
@@ -149,8 +149,9 @@ void coalesce() {
 
 
     //traversing the memory
-    while(current_block < MEMLENGTH) {
-       
+    while(current_block < MEMLENGTH ) {
+        //if (DEBUG) printf("the current block: %llu, first bit: %llu\n", current_block,read_first_bit(heapstart[current_block]) );
+
         if(read_first_bit(heapstart[current_block]) == true) {
             //move to next block if not free
             current_block += (read_block_size(heapstart[current_block]) / 8)+1;
@@ -161,7 +162,9 @@ void coalesce() {
             //free block
             if (prev_status == true) {
                 //prev was free too
-                unsigned long long new_size = read_block_size(heapstart[current_block]) + prev_size;
+                if (DEBUG) printf("the previous size: %llu, the current size: %llu\n", prev_size, read_block_size(heapstart[current_block]));
+                unsigned long long new_size = read_block_size(heapstart[current_block]) + prev_size + 8;
+                if (DEBUG) printf("the combined new size: %llu\n\n", new_size);
 
                 //set new prev size
                 prev_size = new_size;
@@ -174,8 +177,9 @@ void coalesce() {
                 heapstart[current_block] = 0x0000000000000000;
                 
                 //move to the next block
-                current_block += (read_block_size(heapstart[current_block]) / 8)+1;
-                
+                unsigned int temp_block = prev_block;
+                temp_block += (new_size / 8)+1;
+                current_block = temp_block;                
 
             } else {
                 //prev wasn't free
@@ -206,7 +210,7 @@ void myfree(void *ptr, char *file, int line) {
 	*/
     //cast ptr, points to the malloced block
     metadata *new_ptr = (metadata *) (ptr);
-    //printf("the block address: %llu\n", ptr);
+    if(DEBUG) printf("the block address: %llu\n", ptr);
 
 	//case 1: check if the address is in the memory array
     //case 2: check if the address isn't at start
@@ -220,16 +224,23 @@ void myfree(void *ptr, char *file, int line) {
 
     //block we are in
     unsigned int current_block = 0;
-    /*
-    printf("the first address %llu\n", &heapstart[current_block]);
-    printf("the next address %llu\n", &heapstart[current_block + 1]);
-    printf("the metadata %llu\n", heapstart[current_block]);
-    printf("Memory Block Size: %llu\n", read_block_size(heapstart[current_block]));
-    */
+   
+    /*if(DEBUG) {
+        printf("the first address %llu\n", &heapstart[current_block]);
+        printf("the next address %llu\n", &heapstart[current_block + 1]);
+        printf("the metadata %llu\n", heapstart[current_block]);
+        printf("Memory Block Size: %llu\n", read_block_size(heapstart[current_block]));
+        printf("\n");
+    } */
 
     //traversing memory to find address
     while(current_block < MEMLENGTH) {
-       
+ 
+       /*if(DEBUG) {
+            printf("the header address we are looking at: %llu\n", &heapstart[current_block]);
+            printf("the block start address we are looking at: %llu\n", &heapstart[current_block + 1]);
+            printf("\n");
+       }  */
 
        //compare addresses w/ and see if we can find the block
         if((&heapstart[current_block+1])== new_ptr) {
