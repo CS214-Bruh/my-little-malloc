@@ -51,8 +51,7 @@ static bool read_first_bit(metadata x) {
     return (x >> ((sizeof(unsigned long long)*8)-1));
 }
 
-// Broken
-// TODO: Fix it
+// Read the block size of a metadata... Will return the size in bytes.
 static metadata read_block_size(metadata x) {
     if(x > MAX_INT) {
         unsigned long long mask = 0x8000000000000000;
@@ -94,7 +93,7 @@ void *mymalloc(size_t size, char *file, int line){
 			// if(DEBUG) printf("Block Not Empty, Moving to block: %d\n", memory_block);
 		} else {
 			unsigned int mem_block_size_b = heapstart[memory_block];
-            if(DEBUG) {printf("Found free block of size: %d, (Allocated: %i), at block: %llu\n", mem_block_size_b,
+            if(DEBUG) {printf("Found free block of size: %d, (Allocated: %i), at block: %d\n", mem_block_size_b,
                         read_first_bit(heapstart[memory_block]), memory_block);}
 			if(mem_block_size_b >= size) {
 				// Create the replacement metadata
@@ -114,7 +113,7 @@ void *mymalloc(size_t size, char *file, int line){
                 // TODO: Discuss how to handle cases where there is only 1 byte left. (Enough for header and nothing else)
                 if(memory_block < MEMLENGTH) {
 					// Creates the free metadata and puts it in the array.
-					heapstart[memory_block] = create_metadata(mem_block_size_b - size - sizeof(metadata), false);
+					heapstart[memory_block] = create_metadata(mem_block_size_b - size  -sizeof(metadata), false);
                     if(DEBUG) printf("Creating new FREE block..\nNew Block Size: %llu, New Metadata (%llu) inserted at Block: %d\n",
                                      read_block_size(heapstart[memory_block]), heapstart[memory_block], memory_block);
 				} else {if(DEBUG) printf("No free blocks left. %d is >= %d\n", memory_block, MEMLENGTH);}
@@ -210,7 +209,7 @@ void myfree(void *ptr, char *file, int line) {
 	*/
     //cast ptr, points to the malloced block
     metadata *new_ptr = (metadata *) (ptr);
-    if(DEBUG) printf("the block address: %llu\n", ptr);
+    if(DEBUG) printf("the block address: %p\n", new_ptr);
 
 	//case 1: check if the address is in the memory array
     //case 2: check if the address isn't at start

@@ -22,6 +22,7 @@ int main(int argc, char **argv)
 	// fill memory with objects
 	for (i = 0; i < OBJECTS; i++) {
 		obj[i] = malloc(OBJSIZE);
+        printf("\nMade object %d\n", i);
 	}
 	
 	// fill each object with distinct bytes
