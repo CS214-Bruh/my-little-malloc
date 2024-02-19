@@ -97,7 +97,21 @@ void *mymalloc(size_t size, char *file, int line){
                         read_first_bit(heapstart[memory_block]), memory_block);}
 			if(mem_block_size_b >= size) {
 				// Create the replacement metadata
-				metadata replacement = create_metadata(size, true);
+                metadata replacement;
+                // If the array will be left with just enough room for metadata, just give that all the space to this call of malloc
+                unsigned long long temp_size = size;
+                if(temp_size%8 != 0) {
+                    temp_size += (8-(temp_size%8));
+                }
+
+                // Debug for temp size
+                if(DEBUG) printf("Simulate memory block # after: %llu", memory_block + (temp_size / 8) + 1);
+
+                if(memory_block + (temp_size / 8) + 1 == 511) {
+                    replacement = create_metadata(size+sizeof(metadata), true);
+                } else {
+                    replacement = create_metadata(size, true);
+                }
                 if(DEBUG) printf("Creating new block..\nNew Block Size: %llu, New Metadata (%llu) inserted at Block: %d\n", read_block_size(replacement), replacement, memory_block);
                 heapstart[memory_block] = replacement;
 				// Make sure to move the pointer to where the end of the allocated block is and then make the new metadata for the unallocated remaining.

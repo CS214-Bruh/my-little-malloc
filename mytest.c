@@ -13,6 +13,7 @@
 #define MEMSIZE 4096
 #define HEADERSIZE 8
 
+#define NUMMALTESTS 4
 unsigned char *arr[BLOCKSIZE/2];
 
 // Standard malloc and free test on 1 huge block.
@@ -43,7 +44,7 @@ int standard_malloc_free() {
     return correct;
 }
 
-// Malloc Error 1 (Too large of a Block)
+// Malloc Error (Too large of a Block)
 int malloc_huge() {
     int* pointer = malloc(sizeof(char) * (MEMSIZE-HEADERSIZE-1));
     int errors = 0;
@@ -53,12 +54,13 @@ int malloc_huge() {
     for(int i = 0; i < BLOCKSIZE/2; i++) {
         if (*(pointer+i) != i) errors++;
     }
+    free(pointer);
     return errors;
 }
 
 // Malloc 1 less than size of array and try to malloc 1 more to see if it works.
 void malloc_huge_minus_one() {
-    char *pointer = malloc(sizeof(char)* (MEMSIZE-HEADERSIZE-1));
+    char *pointer = malloc(sizeof(char)* (MEMSIZE-HEADERSIZE-1)-8);
     char *pointer2 = malloc(sizeof(char));
 }
 
@@ -103,15 +105,16 @@ int free_coalesce_adj_test() {
     }
     int correct = 1;
     // They should coalesce and I should be able to allocate another 4088 bytes of data
-    char* new_ptr = malloc(sizeof(char) * ((MEMSIZE-HEADERSIZE-1)));
+    unsigned char* new_ptr = malloc(sizeof(char) * ((MEMSIZE-HEADERSIZE-1)));
     for(int i = 0; i < BLOCKSIZE/2; i++) {
         *(new_ptr+i) = i;
 
     }
     for(int i = 0; i < BLOCKSIZE/2; i++) {
+//        printf("%d\n",*(new_ptr + i));
         if (*(new_ptr + i) != i) correct = 0;
     }
-    free_max_number();
+    free(new_ptr);
     return correct;
 }
 
@@ -151,6 +154,7 @@ int my_coalesce_test() {
         if(*(pointer4+i) != i%256) correct = 0;
         
     }
+    free(pointer4);
     return correct;
 }
 
@@ -164,9 +168,9 @@ int main(int argc, char **argv)
     //speed_test(0);
     //printf("Number of Total errors for coalesce: %d\n", my_coalesce_test());
     //free_coalesce_adj_test();
-    char* test_funcs[] = {"Full Malloc and Free Test", "Speed Testing"};
+    char* test_funcs[] = {"Full Malloc and Free Test", "Speed Testing", "Error Testing"};
 
-    int num_of_tests = 2;
+    int num_of_tests = 3;
     printf("Welcome to the testing environment for mymalloc...\n");
     printf("Please choose from the following test functions:\n");
     for(int i =0; i < num_of_tests; i++) {
@@ -175,16 +179,21 @@ int main(int argc, char **argv)
     int choice = scanf("Choice: ");
     switch(choice) {
         case(0): {
+            int passed_subtests = 0;
             printf("Running Standard malloc and free test...");
-            if(standard_malloc_free() == 1) {printf("Passed\n");}else{printf("Failed\n");}
+            if(standard_malloc_free() == 1) {printf("Passed\n");passed_subtests++;}else{printf("Failed\n");}
             printf("Allocating Maximum Space Possible...");
-            printf("%d errors\n", malloc_huge());
+            int mal_huge_errors = malloc_huge();
+            printf("%d errors\n", mal_huge_errors);
+            if(mal_huge_errors == 0) passed_subtests++;
             printf("Running Basic Coalescing Test...");
-            if(my_coalesce_test()) {printf("Passed\n");}else{ printf("Failed");}
+            if(my_coalesce_test()) {printf("Passed\n");passed_subtests++;}else{ printf("Failed");}
             printf("Running Adjacent Free Test to test for coalescing...");
-            if(free_coalesce_adj_test()) { printf("Passed\n"); }else{ printf("Failed\n");}
+            if(free_coalesce_adj_test()) { printf("Passed\n"); passed_subtests++;}else{ printf("Failed\n");}
+            printf("\nTotal malloc free tests Passed: %d/%d\n", passed_subtests, NUMMALTESTS);
             break;
         }
+        
     }
 
 
