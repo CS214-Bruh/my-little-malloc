@@ -119,19 +119,54 @@ int free_coalesce_adj_test() {
 }
 
 // Speed test for malloc() and free() as well as the combination of them.
-struct timeval malloc_start, malloc_stop;
+struct timeval malloc_start, malloc_stop, free_start, free_stop;
 
-void speed_test(char choice) {
-    if(choice <= 0) {
+void speed_test(int number_of_times) {
+    // Just run speed test for malloc
+    int i = 0;
+    // Keep track of some stats for malloc
+    double malloc_avg = 0;
+    double malloc_top = 0;
+    double malloc_low = 0;
+    // Some for free
+    double free_avg = 0;
+    double free_top = 0;
+    double free_low = 0;
+
+    while(i < number_of_times) {
         gettimeofday(&malloc_start, NULL);
         malloc_max_number();
         gettimeofday(&malloc_stop, NULL);
-        printf("took %lf ms\n", ((malloc_stop.tv_sec - malloc_start.tv_sec) * 1000000 + malloc_stop.tv_usec - malloc_start.tv_usec)* 0.001);
-    }
-    if(choice <= 1) {
+        double malloc_time = ((malloc_stop.tv_sec - malloc_start.tv_sec) * 1000000 + malloc_stop.tv_usec - malloc_start.tv_usec)* 0.001;
+        if(malloc_time > malloc_top) malloc_top = malloc_time;
+        if(malloc_time < malloc_low) malloc_low = malloc_time;
+        malloc_avg += malloc_time;
+        // printf("Malloc-ing %d objects took %lf ms\n", BLOCKSIZE/2, malloc_time);
         
         // Run code for freeing... and add the same speed test format except for free...
+        gettimeofday(&free_start, NULL);
+        free_max_number();
+        gettimeofday(&free_stop, NULL);
+        double free_time = ((free_stop.tv_sec - free_start.tv_sec) * 1000000 + free_stop.tv_usec - free_start.tv_usec)* 0.001;
+        if(free_time > free_top) free_top = free_time;
+        if(free_time < free_low) free_low = free_time;
+        free_avg += free_time;
+        //printf("Freeing %d objects took %lf ms\n", BLOCKSIZE/2,free_time);
+
+        i++;
     }
+    printf("Malloc Statistics:\n");
+    printf("Total Items Malloc-ed: %d\n", (BLOCKSIZE/2)*number_of_times);
+    printf("Average Malloc-ing Time per Run of %d objects: %lf\n", BLOCKSIZE/2, malloc_avg/number_of_times);
+    printf("Slowest Run of %d objects: %lf\n", BLOCKSIZE/2, malloc_top);
+    printf("Fastest Run of %d objects: %lf\n", BLOCKSIZE/2, malloc_low);
+
+    printf("Free Statistics:\n");
+    printf("Total Items Freed: %d\n", (BLOCKSIZE/2)*number_of_times);
+    printf("Average Freeing Time per Run of %d objects: %lf\n", BLOCKSIZE/2, free_avg/number_of_times);
+    printf("Slowest Run of %d objects: %lf\n", BLOCKSIZE/2, free_top);
+    printf("Fastest Run of %d objects: %lf\n", BLOCKSIZE/2, free_low);
+
 }
 
 int my_coalesce_test() {
@@ -174,11 +209,12 @@ int main(int argc, char **argv)
     printf("Welcome to the testing environment for mymalloc...\n");
     printf("Please choose from the following test functions:\n");
     for(int i =0; i < num_of_tests; i++) {
-        printf("%d: %s\n", i, test_funcs[i]);
+        printf("%d: %s\n", i+1, test_funcs[i]);
     }
-    int choice = scanf("Choice: ");
+    int choice;
+    scanf("%d", &choice);
     switch(choice) {
-        case(0): {
+        case(1): {
             int passed_subtests = 0;
             printf("Running Standard malloc and free test...");
             if(standard_malloc_free() == 1) {printf("Passed\n");passed_subtests++;}else{printf("Failed\n");}
@@ -193,7 +229,14 @@ int main(int argc, char **argv)
             printf("\nTotal malloc free tests Passed: %d/%d\n", passed_subtests, NUMMALTESTS);
             break;
         }
-        
+        case(2): {
+            int num_of_tests;
+            printf("How many Tests?");
+            scanf("%d", &num_of_tests);
+            speed_test(num_of_tests);
+            break;
+        }
+
     }
 
 
