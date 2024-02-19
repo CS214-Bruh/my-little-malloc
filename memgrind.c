@@ -195,6 +195,16 @@ int my_coalesce_test() {
     return correct;
 }
 
+void error_test() {
+    printf("Running Error Testing...\n");
+    printf("Malloc Error Test 1: Malloc Too Much Memory\n");
+    malloc(sizeof(char) * MEMSIZE-HEADERSIZE+1);
+    printf("Malloc Error Test 2: Malloc More Than Available Memory\n");
+    char* ptr = malloc(sizeof(char) * MEMSIZE-HEADERSIZE-1);
+    char* ptr2 = malloc(sizeof(char));
+    printf("Free Error Test 1: \n");
+}
+
 int main(int argc, char **argv)
 {
 //    double* a = malloc(sizeof(double));
@@ -237,6 +247,9 @@ int main(int argc, char **argv)
             scanf("%d", &num_of_tests);
             speed_test(num_of_tests);
             break;
+        }
+        case(3): {
+            error_test();         
         }
 
     }
