@@ -1,9 +1,9 @@
 CC = gcc
 CFLAGS = -Wall -fsanitize=address -std=c99
-DEBUG = -DDEBUG
+# DEBUG = -DDEBUG
 
-memtest: memtest.o mymalloc.o  
-	$(CC) $(CFLAGS) $(DEBUG) memtest.o mymalloc.o -o memtest  
+memtestex: memtest.o mymalloc.o
+	$(CC) $(CFLAGS) $(DEBUG) memtest.o mymalloc.o -o memtestex
 
 mymalloc.o: mymalloc.c mymalloc.h  
 	$(CC) $(CFLAGS) $(DEBUG) -c -Wall mymalloc.c  
@@ -11,20 +11,17 @@ mymalloc.o: mymalloc.c mymalloc.h
 memtest.o: memtest.c mymalloc.h  
 	$(CC) $(CFLAGS) $(DEBUG) -c -Wall memtest.c
 
-testmem: memtest
-	./memtest
+memtest: memtestex
+	./memtestex
 
-testmy: mytest
-	./mytest
+memgrind: memgrindex
+	./memgrindex
 
-mytest: mytest.o mymalloc.o
-	$(CC) $(CFLAGS) $(DEBUG) mytest.o mymalloc.o -o mytest
+memgrindex: memgrind.o mymalloc.o
+	$(CC) $(CFLAGS) $(DEBUG) memgrind.o mymalloc.o -o memgrindex
 
-mytest.o: mytest.c mymalloc.h
-	$(CC) $(CFLAGS) $(DEBUG) -c -Wall mytest.c
+memgrind.o: memgrind.c mymalloc.h
+	$(CC) $(CFLAGS) $(DEBUG) -c -Wall memgrind.c
 
-cleanmem:  
-	rm *.o memtest
-
-cleanmy:
-	rm *o mytest
+clean:
+	rm *.o memtestex memgrindex
