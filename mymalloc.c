@@ -144,7 +144,7 @@ void *mymalloc(size_t size, char *file, int line){
     return NULL;
 }
 
-void coalesce() {
+static void coalesce() {
     //flag to see if prev chunk was free, true if free
     int prev_status = false;
 
