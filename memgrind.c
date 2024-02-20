@@ -85,11 +85,12 @@ int random_malloc_free() {
             total_allocations++;
             location++;
         } else if (rand_val == 0 && location != 0) {
-           free(arr_ptrs[location]);
             location--;
             total_allocations--;
             allocated[location] = 0;
             //printf("freed: %d\n", location);
+             free(arr_ptrs[location]);
+
         }
     }
 
