@@ -13,10 +13,68 @@
 #define MEMSIZE 4096
 #define HEADERSIZE 8
 
-#define NUMMALTESTS 4
+#define NUMMALTESTS 7
 #define MAX_INT 2147483647
 
 unsigned char *arr[BLOCKSIZE/2];
+
+//Task 1: malloc() & immediately free() a 1-byte object, 120 times
+void malloc_free_120() {
+   for (int i = 0; i < 120; i++) {
+        char* ptr = malloc(sizeof(char));
+        free(ptr);
+    } 
+}
+
+//Task 2: array of 120 pointers to 1-byte objects through malloc, then freed
+void malloc120_free() {
+    //filling up the array
+    char *arr_ptrs[120];
+    for(int i = 0; i < 120; i++) {
+        arr_ptrs[i] = malloc(sizeof(char));
+    }
+    
+    //freeing the array up
+    for(int i = 0; i < 120; i++) {
+        free(arr_ptrs[i]);
+    } 
+}
+
+//Task 3: array of 120 pointers, randomly choose to allocate or deallocate until 
+// 120 total allocations have been done, deallocate any remaining objects
+void random_malloc_free() {
+    int total_allocations = 0;
+    int allocated[120];
+    int location = 0;
+    char *arr_ptrs[120];
+
+    while (total_allocations < 120) {
+        int rand_val = rand() % 2; //generate a random val b/w 0 and 1, 0 indicates deallocate, 1 indicates allocate
+        if (rand_val == 1) {
+            //printf("the allocated: %d\n", location);
+            arr_ptrs[location] = malloc(sizeof(char));
+            //set to arbitrary value as allocated array initialized with indeterminate values
+            allocated[location] = 6999;
+            total_allocations++;
+            location++;
+        } else if (rand_val == 0 && location != 0) {
+            location--;
+            allocated[location] = 0;
+            //printf("freed: %d\n", location);
+            free(arr_ptrs[location]);
+        }
+    }
+
+    //clean up any remaining objects
+    for(int i = 0; i < 120; i++) {
+        if (allocated[i] == 6999) {
+            //printf("the still allocated: %d\n", i);
+            free(arr_ptrs[i]);
+        }
+    }
+
+}
+
 
 // Standard malloc and free test on 1 huge block.
 int standard_malloc_free() {
@@ -199,10 +257,26 @@ void error_test() {
     printf("Running Error Testing...\n");
     printf("Malloc Error Test 1: Malloc Too Much Memory\n");
     malloc(sizeof(char) * MEMSIZE-HEADERSIZE+1);
+    printf("\n");
+
     printf("Malloc Error Test 2: Malloc More Than Available Memory\n");
     char* ptr = malloc(sizeof(char) * MEMSIZE-HEADERSIZE-1);
     char* ptr2 = malloc(sizeof(char));
-    printf("Free Error Test 1: \n");
+    printf("\n");
+
+    printf("Free Error Test 1: Free called on pointer not allocated by malloc \n");
+    int value = 5;
+    int* value_ptr = &value;
+    free(value_ptr);
+    printf("\n");
+
+    printf("Free Error Test 2: Free called on pointer already freed \n");
+    free(ptr);
+    char* ptr3 = malloc(sizeof(char) * MEMSIZE-HEADERSIZE-1);
+    free(ptr3);
+    free(ptr3);
+    printf("\n");
+
 }
 
 int main(int argc, char **argv)
@@ -228,6 +302,18 @@ int main(int argc, char **argv)
     switch(choice) {
         case(1): {
             int passed_subtests = 0;
+            printf("Running Task 1: malloc() & immediately free() a 1-byte object, 120 times... \n");
+            malloc_free_120();
+            printf("Passed\n");
+            passed_subtests++;
+            printf("Running Task 2: malloc() 120 1-byte objects into an array of pointers, then freeing... \n");
+            malloc120_free();
+            printf("Passed\n");
+            passed_subtests++;
+            printf("Running Task 3: randomly free and allocate from an array of 120 pointer to 1-byte objects...");
+            random_malloc_free();
+            printf("Passed\n");
+            passed_subtests++;
             printf("Running Standard malloc and free test...");
             if(standard_malloc_free() == 1) {printf("Passed\n");passed_subtests++;}else{printf("Failed\n");}
             printf("Allocating Maximum Space Possible...");

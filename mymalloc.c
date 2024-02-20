@@ -218,7 +218,7 @@ void myfree(void *ptr, char *file, int line) {
 
 	things to check for:
 	- if free was called on a pointer not allocated my malloc
-	- if free was called on an address not at the start of an address
+	    - if free was called on an address not at the start of an address
 	- if free was called on something already freed
 	*/
     //cast ptr, points to the malloced block
@@ -264,7 +264,7 @@ void myfree(void *ptr, char *file, int line) {
         current_block += (read_block_size(heapstart[current_block]) / 8)+1;
     } 
 
-    //error: when pointer not in memory allocated by malloc
+    //error 1 & 2: when pointer not in memory allocated by malloc
     if (!in_array) {
         fprintf(stderr, "Free called on pointer not allocated by malloc on %s: Line %d.\n", file, line);
         return;
