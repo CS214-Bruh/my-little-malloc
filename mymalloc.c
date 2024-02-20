@@ -77,7 +77,7 @@ void *mymalloc(size_t size, char *file, int line){
 	unsigned int memory_block = 0;
 
     // Error Check 1: Malloc too much memory
-    if(size > MEMLENGTH*8) {
+    if(size > MEMLENGTH*8-sizeof(metadata)) {
         fprintf(stderr, "Attempt to allocate %zu bytes from %s : Line %d. \nNo memory allocated.\n", size, file, line);
         if(DEBUG) printf("Actual memory size: %llu\n", read_block_size(heapstart[0]));
         return NULL;
@@ -218,7 +218,7 @@ void myfree(void *ptr, char *file, int line) {
 
 	things to check for:
 	- if free was called on a pointer not allocated my malloc
-	- if free was called on an address not at the start of an address
+	    - if free was called on an address not at the start of an address
 	- if free was called on something already freed
 	*/
     //cast ptr, points to the malloced block
@@ -264,7 +264,7 @@ void myfree(void *ptr, char *file, int line) {
         current_block += (read_block_size(heapstart[current_block]) / 8)+1;
     } 
 
-    //error: when pointer not in memory allocated by malloc
+    //error 1 & 2: when pointer not in memory allocated by malloc
     if (!in_array) {
         fprintf(stderr, "Free called on pointer not allocated by malloc on %s: Line %d.\n", file, line);
         return;
