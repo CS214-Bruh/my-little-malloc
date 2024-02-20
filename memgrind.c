@@ -151,6 +151,7 @@ int malloc_huge() {
 void malloc_huge_minus_one() {
     char *pointer = malloc(sizeof(char)* (MEMSIZE-HEADERSIZE-1)-8);
     char *pointer2 = malloc(sizeof(char));
+    free(pointer);
 }
 
 // Malloc an entire array of chars and count to make sure the all the spaces have been used
@@ -315,21 +316,33 @@ void error_test() {
     printf("\n");
 
     printf("Malloc Error Test 2: Malloc More Than Available Memory\n");
-    char* ptr = malloc(sizeof(char) * MEMSIZE-HEADERSIZE-1);
-    char* ptr2 = malloc(sizeof(char));
+    malloc_max_number();
+    // Should throw an error now
+    char* ptr = malloc(sizeof(char));
+    free_max_number();
     printf("\n");
 
-    printf("Free Error Test 1: Free called on pointer not allocated by malloc \n");
+    printf("Free Error Test 1: Free called on pointer already freed\n");
+    free(ptr);
+    char* ptr3 = malloc(sizeof(char) * MEMSIZE-HEADERSIZE-1);
+    free(ptr3);
+    free(ptr3);
+    printf("\n");
+
+    printf("Free Error Test 2: Free called on pointer not allocated by malloc \n");
+    char* ptr4 = malloc(sizeof(char) * MEMSIZE-HEADERSIZE-1);
+    free(ptr4+1);
+    free(ptr4);
+    printf("\n");
+
+    printf("Free Error Test 3: Free called on Address in heap but not of object \n");
     int value = 5;
     int* value_ptr = &value;
     free(value_ptr);
     printf("\n");
 
-    printf("Free Error Test 2: Free called on pointer already freed \n");
-    free(ptr);
-    char* ptr3 = malloc(sizeof(char) * MEMSIZE-HEADERSIZE-1);
-    free(ptr3);
-    free(ptr3);
+    printf("Misc Error Test 1: Allocate memory 1 byte less than MEMSIZE and test special condition \n");
+    malloc_huge_minus_one();
     printf("\n");
 
 }
@@ -381,9 +394,14 @@ int main(int argc, char **argv)
             printf("How many Tests?");
             scanf("%d", &numb_of_tests);
             speed_test_default(numb_of_tests);
+            printf("\n");
             speed_test(&malloc_free_120, numb_of_tests, 1);
+            printf("\n");
             speed_test(&malloc120_free, numb_of_tests, 2);
+            printf("\n");
             speed_test(&random_malloc_free, numb_of_tests, 3);
+            printf("\n");
+            speed_test(&free_coalesce_adj_test, numb_of_tests, 4);
             break;
         }
         case(3): {

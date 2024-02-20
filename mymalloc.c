@@ -77,7 +77,7 @@ void *mymalloc(size_t size, char *file, int line){
 	unsigned int memory_block = 0;
 
     // Error Check 1: Malloc too much memory
-    if(size > MEMLENGTH*8) {
+    if(size > MEMLENGTH*8-sizeof(metadata)) {
         fprintf(stderr, "Attempt to allocate %zu bytes from %s : Line %d. \nNo memory allocated.\n", size, file, line);
         if(DEBUG) printf("Actual memory size: %llu\n", read_block_size(heapstart[0]));
         return NULL;
