@@ -61,17 +61,3 @@ How to Compile and Run our Test Cases:
     - type in option 3 to run all of our error tests
 
 
-
-
- 
-- any additional info needed to compile and run our test cases
-	- like how to use them, what info they take, etc.
-- design notes
-	- for situation where we just have enough space for a metadata: stretches the previous one up to the end
-- our test plan/testing strategy
-- description of our performance tests and why we chose them
-- we don't have to submit memtest
-- like what fields we have in our header & why
-- what we do during errors (like if we just return or whatever)
-	- malloc must return null and continue on
-	- free can do anything (message and return or whatever)
