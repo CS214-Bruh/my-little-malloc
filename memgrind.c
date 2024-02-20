@@ -67,7 +67,11 @@ int malloc120_free() {
 // 120 total allocations have been done, deallocate any remaining objects
 int random_malloc_free() {
     int total_allocations = 0;
+   // Array of ints indicating 0 if not allocated, 1 if allocated.
     int allocated[120];
+   for(int i = 0; i < 120; i++) {
+      allocated[i] = 0;
+   }
     int location = 0;
     char *arr_ptrs[120];
 
@@ -77,20 +81,21 @@ int random_malloc_free() {
             //printf("the allocated: %d\n", location);
             arr_ptrs[location] = malloc(sizeof(char));
             //set to arbitrary value as allocated array initialized with indeterminate values
-            allocated[location] = 6999;
+            allocated[location] = 1;
             total_allocations++;
             location++;
         } else if (rand_val == 0 && location != 0) {
+           free(arr_ptrs[location]);
             location--;
+            total_allocations--;
             allocated[location] = 0;
             //printf("freed: %d\n", location);
-            free(arr_ptrs[location]);
         }
     }
 
     //clean up any remaining objects
-    for(int i = 0; i < 120; i++) {
-        if (allocated[i] == 6999) {
+    for(int i = 0; i < total_allocations; i++) {
+        if (allocated[i] == 1) {
             //printf("the still allocated: %d\n", i);
             free(arr_ptrs[i]);
         }
